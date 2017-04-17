@@ -10,10 +10,13 @@ import android.content.DialogInterface
 import android.content.res.TypedArray
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.Typeface
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import android.widget.TextView
 import java.util.*
@@ -29,24 +32,43 @@ class Game2048View : FrameLayout {
         var TAG = "Game2048View";
     }
 
+    private var TYPE_GOOD: String = "GOOD";
+    private var TYPE_MERGE: String = "MERGE";
+    private var TYPE_MOVE: String = "MOVE";
+
+    private var mTouchSlop: Int = 0;
+    private var mStarted: Boolean = false;
+
+    private val mDuration: Long = 300;
+    private var mColumnSize: Int;
+    private lateinit var mBlockArray: Array<Array<GameUtil.Block>>;
+    /**
+     * 滑动后剩余的空白位置
+     */
+    private var mEmptyPointList: ArrayList<Point> = ArrayList<Point>()
+    /**
+     * 滑动后需要移动 的Action
+     */
+    private var mActionList: ArrayList<GameUtil.Block> = ArrayList<GameUtil.Block>()
+    private var mGameUtil = GameUtil();
+
+
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0) {
 
+        SoundPoolManager.init(context, TYPE_GOOD, R.raw.good);
+        SoundPoolManager.init(context, TYPE_MERGE, R.raw.merge);
+        SoundPoolManager.init(context, TYPE_MOVE, R.raw.move);
+
+        val vc = ViewConfiguration.get(getContext())
+        mTouchSlop = vc.scaledTouchSlop;
     }
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         val typeArray: TypedArray = context!!.obtainStyledAttributes(attrs,
                 R.styleable.Game2048View)
-        size = typeArray.getInteger(R.styleable.Game2048View_grid, 4);
+        mColumnSize = typeArray.getInteger(R.styleable.Game2048View_grid, 4);
 
     }
-
-    val duration: Long = 300;
-    var size: Int;
-    lateinit var array: Array<Array<GameUtil.Block>>;
-    var emptyPointList: ArrayList<Point> = ArrayList<Point>()
-    var actionList: ArrayList<GameUtil.Block> = ArrayList<GameUtil.Block>()
-    var gameUtil = GameUtil();
-
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -56,32 +78,31 @@ class Game2048View : FrameLayout {
 
     fun start() {
         Log.d(TAG, "开始游戏")
-
         reset();
         doNext();
+        mStarted = true;
     }
 
     fun doNext() {
         if (checkGameOver()) {
             Log.d(TAG, "游戏结束")
-            var dialog = AlertDialog.Builder(context).setTitle("Game Over").setMessage("是否再玩一遍")
-                    .setPositiveButton("确定", DialogInterface.OnClickListener { dialog, which -> reset();doNext(); })
+            var dialog = AlertDialog.Builder(context).setTitle("Game Over").setMessage(String.format("您本次得分%d,是否再玩一遍", totalScore))
+                    .setPositiveButton("确定", DialogInterface.OnClickListener { dialog, which -> start(); })
                     .setNegativeButton("取消", DialogInterface.OnClickListener { dialog, which -> reset();invalidate(); }).create()
             dialog.show()
             return;
         }
-        var randomIndex = Random().nextInt(emptyPointList.size);
-        var point = emptyPointList.removeAt(randomIndex);
-
+        var randomIndex = Random().nextInt(mEmptyPointList.size);
+        var point = mEmptyPointList.removeAt(randomIndex);
 
         var randomValue = getRandomValue();
-        (array[point.y])[point.x].value = randomValue;
+        (mBlockArray[point.y])[point.x].value = randomValue;
 
         var view = createView(point, randomValue);
-        addView(view, getLayoutParams(point));
+        addView(view, LayoutParams(width / mColumnSize, width / mColumnSize));
 
-        view.translationX = (point.x * width.toFloat()) / size;
-        view.translationY = (point.y * height.toFloat()) / size;
+        view.translationX = (point.x * width.toFloat()) / mColumnSize;
+        view.translationY = (point.y * height.toFloat()) / mColumnSize;
 
         invalidate();
 
@@ -92,13 +113,13 @@ class Game2048View : FrameLayout {
         Log.d(TAG, "往" + direction + "滑动");
 
 
-        emptyPointList.clear();
-        actionList.clear();
+        mEmptyPointList.clear();
+        mActionList.clear();
 
-        gameUtil.scroll(array, direction, emptyPointList, actionList);
+        mGameUtil.scroll(mBlockArray, direction, mEmptyPointList, mActionList);
 
         Log.d(TAG, "所有移动如下:")
-        for (block in actionList) {
+        for (block in mActionList) {
             Log.d(TAG, block.getActionStr())
         }
 
@@ -108,13 +129,13 @@ class Game2048View : FrameLayout {
     }
 
     fun doActionAnimation(callback: Runnable) {
-        if (actionList.size == 0) {
+        if (mActionList.size == 0) {
             callback.run();
             return;
         }
         Log.d(TAG, "开始滑动==")
         var animatorSet: AnimatorSet = AnimatorSet();
-        animatorSet.duration = duration
+        animatorSet.duration = mDuration
         animatorSet.addListener(object : Animator.AnimatorListener {
             override fun onAnimationEnd(animation: Animator?) {
                 Log.d(TAG, "动画全部完成");
@@ -131,22 +152,25 @@ class Game2048View : FrameLayout {
             }
         })
 
-        for (block in actionList) {
+        for (block in mActionList) {
             val needRemoveView = block.changeX >= 0;
             var removeTranslation: Float = 0F;
             var targetRemoveView: BlockView? = null;
             if (needRemoveView) {
                 if (block.x == block.pX) {
-                    removeTranslation = Math.abs((block.changeY * width).toFloat() / size);
+                    removeTranslation = Math.abs((block.changeY * width).toFloat() / mColumnSize);
                 } else {
-                    removeTranslation = Math.abs((block.changeX * width).toFloat() / size);
+                    removeTranslation = Math.abs((block.changeX * width).toFloat() / mColumnSize);
                 }
                 targetRemoveView = getView(block.changeX, block.changeY);
+
+            } else {
+                play(TYPE_MOVE);
             }
             var scrollHorizontal: Boolean = (block.pY == block.y);
 
-            var startOffset = (width * (if (scrollHorizontal) block.pX else block.pY)).toFloat() / size;
-            var targetOffset = (width * (if (scrollHorizontal) block.x else block.y)).toFloat() / size;
+            var startOffset = (width * (if (scrollHorizontal) block.pX else block.pY)).toFloat() / mColumnSize;
+            var targetOffset = (width * (if (scrollHorizontal) block.x else block.y)).toFloat() / mColumnSize;
 
             Log.d(TAG, block.getActionStr() + " 像素从" + startOffset + "到" + targetOffset);
 
@@ -156,11 +180,11 @@ class Game2048View : FrameLayout {
                 continue;
             }
             view!!.needRemoveView = needRemoveView;
-            view.removeTranslation = removeTranslation + ((if (targetOffset > startOffset) -0.02F else 0.02F) * width / size);
+            view.removeTranslation = removeTranslation + ((if (targetOffset > startOffset) -0.02F else 0.02F) * width / mColumnSize);
             view.removeTranslation = Math.min(Math.max(0F, view.removeTranslation), width.toFloat());
 
             var animation: ValueAnimator = ObjectAnimator.ofFloat(view, (if (scrollHorizontal) "translationX" else "translationY"), startOffset, targetOffset);
-            animation.duration = duration;
+            animation.duration = mDuration;
             animation.addListener(object : Animator.AnimatorListener {
                 override fun onAnimationRepeat(animation: Animator?) {
                 }
@@ -190,24 +214,21 @@ class Game2048View : FrameLayout {
                     //删除合并的view
                     removeView(targetRemoveView)
 
+                    addScore(view.value);
+
                     view.needRemoveView = false;
                     view.value = view.value * 2;
                     view.setText(view.value.toString());
+
+                    play(TYPE_MERGE);
                     Log.d(TAG, "改变" + "(" + view.point.x + "," + view.point.y + ")的值为" + view.value);
                 } else {
                     Log.d(TAG, "移动 currentTranslation：" + currentTranslation + " removeTranslation:" + view.removeTranslation);
                 }
-//                view.invalidate();
             }
             animatorSet.playSequentially(animation);
         }
         animatorSet.start()
-    }
-
-    fun removeView(x: Int, y: Int) {
-        var view = getView(x, y);
-        Log.d(TAG, "删除View(" + x + "," + y + ")" + (if (view == null) "失败" else "成功"));
-        removeView(view);
     }
 
     fun getView(x: Int, y: Int): BlockView? {
@@ -232,35 +253,27 @@ class Game2048View : FrameLayout {
     }
 
     fun checkGameOver(): Boolean {
-        //TODO 滑动不能减少位置
-        return emptyPointList.size == 0;//没有空白位置，且滑动也不能减少位置
+        //TODO 提前计算能不能减少位置
+        return mEmptyPointList.size == 0;//没有空白位置，且滑动也不能减少位置
     }
 
     fun reset() {
         Log.d(TAG, "初始化")
+        mStarted = false;
+        totalScore = 0;
+        onScoreChanged()
         removeAllViews();
-        emptyPointList.clear();
-        array = Array(size, { y -> Array(size, { x -> GameUtil.Block(x, y, 0) }) });
-        for (y in 0..size - 1) {
-            for (x in 0..size - 1) {
-                emptyPointList.add(Point(x, y))
+        mEmptyPointList.clear();
+        mBlockArray = Array(mColumnSize, { y -> Array(mColumnSize, { x -> GameUtil.Block(x, y, 0) }) });
+        for (y in 0..mColumnSize - 1) {
+            for (x in 0..mColumnSize - 1) {
+                mEmptyPointList.add(Point(x, y))
             }
         }
     }
 
-//    fun updateLayout(blockView: BlockView) {
-//        var layoutParams = (blockView.layoutParams as LayoutParams);
-//        layoutParams.width = width / size;
-//        layoutParams.height = blockView.width;
-//        layoutParams.leftMargin = blockView.point.x * width / size;
-//        layoutParams.topMargin = blockView.point.y * height / size;
-//    }
-
-    fun getLayoutParams(point: Point): LayoutParams {
-        var layoutParams = LayoutParams(width / size, width / size);
-//        layoutParams.leftMargin = point.x * width / size;
-//        layoutParams.topMargin = point.y * height / size;
-        return layoutParams;
+    fun play(type: String) {
+        SoundPoolManager.play(type)
     }
 
     class BlockView : TextView {
@@ -275,6 +288,8 @@ class Game2048View : FrameLayout {
             gravity = Gravity.CENTER;
             setText("" + value);
             setTextColor(Color.RED);
+            setTextSize(28F)
+            setTypeface(Typeface.DEFAULT_BOLD);
             this.setBackgroundColor(Color.GRAY);
         }
 
@@ -282,6 +297,47 @@ class Game2048View : FrameLayout {
             point.x = x;
             point.y = y;
         }
+    }
+
+    var touchDownX: Float = 0f;
+    var touchDownY: Float = 0f;
+    var scrolled: Boolean = false;
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        when (event!!.action) {
+            MotionEvent.ACTION_DOWN -> {
+                touchDownX = event.x;
+                touchDownY = event.y;
+                scrolled = false;
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (mStarted && !scrolled) {
+
+                    var tmpX = event.x;
+                    var tmpY = event.y;
+                    var deltaX = Math.abs(tmpX - touchDownX);
+                    var deltaY = Math.abs(tmpY - touchDownY);
+                    if (deltaX > deltaY && deltaX > mTouchSlop) {
+                        scroll(if (tmpX > touchDownX) GameUtil.Direction.Right else GameUtil.Direction.Left)
+                        scrolled = true;
+                    } else if (deltaY > deltaX && deltaY > mTouchSlop) {
+                        scroll(if (tmpY > touchDownY) GameUtil.Direction.Bottom else GameUtil.Direction.Top)
+                        scrolled = true;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    var totalScore: Int = 0;
+    fun addScore(scoreValue: Int) {
+        totalScore += scoreValue;
+
+        onScoreChanged();
+    }
+
+    fun onScoreChanged() {
+        ((context as GameActivity)).onScoreChanged(totalScore);
     }
 
 }

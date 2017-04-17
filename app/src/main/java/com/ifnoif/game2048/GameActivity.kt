@@ -15,11 +15,10 @@ class GameActivity : Activity() {
         setContentView(R.layout.activity_game);
 
         start.setOnClickListener { gameView.start() }
+    }
 
-        scrollLeft.setOnClickListener { gameView.scroll(GameUtil.Direction.Left) }
-        scrollRight.setOnClickListener { gameView.scroll(GameUtil.Direction.Right) }
-        scrollTop.setOnClickListener { gameView.scroll(GameUtil.Direction.Top) }
-        scrollBottom.setOnClickListener { gameView.scroll(GameUtil.Direction.Bottom) }
+    fun onScoreChanged(scoreValue: Int) {
+        score.setText(scoreValue.toString());
     }
 
     override fun onPause() {

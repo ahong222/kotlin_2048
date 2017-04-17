@@ -9,54 +9,56 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ifnoif.game2048.GameActivity">
 
+
+    <LinearLayout
+        android:id="@+id/score_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="得分:" />
+
+        <TextView
+            android:id="@+id/score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="100dp"
+            android:textColor="#E07C00"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:layout_marginLeft="15dp"/>
+    </LinearLayout>
+
     <com.ifnoif.game2048.Game2048View
         android:id="@+id/gameView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/score_layout"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="30dp"
         android:background="#50004400"
-        app:gird="4"></com.ifnoif.game2048.Game2048View>
+        app:gird="4" />
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
+        android:layout_below="@+id/gameView"
+        android:layout_marginTop="50dp"
+        android:gravity="center">
 
         <Button
             android:id="@+id/start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="center"
             android:text="开始" />
 
-        <Button
-            android:id="@+id/scrollLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="左滑" />
 
-        <Button
-            android:id="@+id/scrollRight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="右滑" />
-
-        <Button
-            android:id="@+id/scrollTop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="上滑" />
-
-        <Button
-            android:id="@+id/scrollBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="下滑" />
-
-    </LinearLayout>
+    </FrameLayout>
 </RelativeLayout>

@@ -99,21 +99,12 @@ class GameUtil {
                     //去除空格
                     //把小Index往大Index移动
                     removeOnBlank(array, x, y);
-//                    for (newX in (x downTo 1)) {
-//                        var tmp = (array[y])[newX];
-//                        (array[y])[newX] = (array[y])[newX-1];
-//                        (array[y])[newX-1] = tmp;
-//                    }
                 }
             }
         }
     }
 
     fun removeOnBlank(array: Array<Array<Block>>, emptyX: Int, currentY: Int) {
-        var size: Int = array.size;
-//        for (y in (0..size - 1)) {
-//            for (x in (size - 1 downTo 0)) {
-//                if ((array[y])[x].value == 0) {
         //去除空格
         //把小Index往大Index移动
         for (newX in (emptyX downTo 1)) {
@@ -125,9 +116,6 @@ class GameUtil {
             (array[currentY])[newX] = (array[currentY])[newX - 1];
             (array[currentY])[newX - 1] = tmp;
         }
-//                }
-//            }
-//        }
     }
 
 
