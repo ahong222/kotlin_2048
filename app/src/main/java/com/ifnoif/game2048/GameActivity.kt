@@ -12,16 +12,20 @@ class GameActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game);
+        setContentView(R.layout.activity_game)
 
-        start.setOnClickListener { gameView.start() }
+        start.setOnClickListener {
+            GsonTest.testGson()
+            gameView.start()
+        }
     }
 
     fun onScoreChanged(scoreValue: Int) {
-        score.setText(scoreValue.toString());
+        score.text = scoreValue.toString()
     }
 
     override fun onPause() {
         super.onPause()
     }
+
 }

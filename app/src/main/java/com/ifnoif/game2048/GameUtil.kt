@@ -1,6 +1,8 @@
 package com.ifnoif.game2048
 
 import android.graphics.Point
+import android.util.Log
+import java.util.*
 
 /**
  * Created by shen on 17/4/11.
@@ -52,7 +54,7 @@ class GameUtil {
         getAction(array, listAction);
 
         dumpEndArray(array, "end")
-        println("end scroll =========");
+        ("end scroll =========").println();
     }
 
     fun addSameToRight(array: Array<Array<Block>>) {
@@ -143,7 +145,6 @@ class GameUtil {
         return direction;
     }
 
-
     fun convert(array: Array<Array<Block>>, direction: Direction, convertChangedSize: Boolean) {
         if (direction == Direction.Right) {
             return;
@@ -197,7 +198,7 @@ class GameUtil {
     }
 
     fun dumpArray(array: Array<Array<Block>>, tag: String) {
-        println(tag + " dumpArray========");
+        (tag + " dumpArray========").println();
         var size: Int = array.size;
         for (y in (0..size - 1)) {
             var logStr: StringBuilder = StringBuilder();
@@ -236,19 +237,26 @@ class GameUtil {
                 }
 
                 if ((array[y])[x].value != 0 && !(array[y])[x].merged && (array[y])[x].y * 10 + (array[y])[x].x != ((array[y])[x].pX * 10 + (array[y])[x].pY)) {
-                    println(tag + " remove==" + (array[y])[x].pX + "," + (array[y])[x].pY + " 移动到:" + (array[y])[x].x + "," + (array[y])[x].y + str);
+                    (tag + " remove==" + (array[y])[x].pX + "," + (array[y])[x].pY + " 移动到:" + (array[y])[x].x + "," + (array[y])[x].y + str).println();
                 }
             }
         }
     }
 
     fun onStartScroll(array: Array<Array<Block>>) {
-        var size: Int = array.size;
-        for (y in (0..size - 1)) {
-            for (x in (0..size - 1)) {
-                (array[y])[x].reset();
-            }
-        }
+//        var size: Int = array.size;
+//        for (y in (0..size - 1)) {
+//            for (x in (0..size - 1)) {
+//                (array[y])[x].reset();
+//            }
+//        }
+
+//        使用函数
+//        array.forEach { arr->arr.forEach { item->item.reset() } }
+//        array.flatten().forEach { item->item.reset() }
+//        array.flatMap { item->item.toList()}.forEach { Block::reset }
+//        array.flatten().forEach { Block::reset }
+        array.flatten().forEach(Block::reset)
     }
 
     fun onEndScroll(array: Array<Array<Block>>) {
@@ -284,7 +292,7 @@ class GameUtil {
         scroll(array, direction, listPoint, listAction);
     }
 
-    open class Block {
+    open class Block1  {
         //最终的Value
         var value: Int = 0;
         //最终的位置
@@ -307,14 +315,16 @@ class GameUtil {
             this.x = x;
             this.y = y;
             this.value = value;
+        }
 
+        init {
             pX = x;
             pY = y;
             pValue = value;
         }
 
-        fun copy(): Block {
-            var block = Block(x, y, value);
+        fun copy(): Block1 {
+            var block = Block1(x, y, value);
             block.pX = pX;
             block.pY = pY;
             block.pValue = pValue;
@@ -334,19 +344,45 @@ class GameUtil {
         }
 
         fun getActionStr(): String {
+            var block: Block1 = this;
+            var direct = if (block.pX == block.x) (if (block.y > block.pY) "向下" else "向上") else (if (block.x > block.pX) "向右" else "向左");
+            return "方块从 px:" + block.pX + " pY:" + block.pY + " " + direct + "滑到:" + block.x + "," + block.y + (if (block.changeX < 0) "" else (",并移除(" + block.changeX + "," + block.changeY + ")"))
+        }
+    }
+
+
+    /**
+     * 最终的位置：x,y,value
+     * 临时变量:px,py,pValue,changeX,changeY,merged
+     * x,y 与 px,py不相等表示有移动
+     * value与pValue不相等表示有合并，value>pValue表示合并，value＝0表示被合并，要删除View
+     * changeX>=0 && changeY>=0表示改变值的坐标
+     */
+    data class Block(var x: Int, var y: Int, var value: Int,
+                     var pX: Int = x,
+                     var pY: Int = y,
+                     var pValue: Int = value,
+                     var changeX: Int = -1,
+                     var changeY: Int = -1,
+                     var merged: Boolean = false) {
+        fun reset() {
+            pX = x;
+            pY = y;
+            pValue = value;
+            merged = false;
+            changeX = -1;
+            changeY = -1;
+        }
+
+        fun getActionStr(): String {
             var block: Block = this;
             var direct = if (block.pX == block.x) (if (block.y > block.pY) "向下" else "向上") else (if (block.x > block.pX) "向右" else "向左");
             return "方块从 px:" + block.pX + " pY:" + block.pY + " " + direct + "滑到:" + block.x + "," + block.y + (if (block.changeX < 0) "" else (",并移除(" + block.changeX + "," + block.changeY + ")"))
         }
     }
 
-    fun print(str: String) {
-        if (debug)
-            System.out.print(str);
-    }
-
-    fun println(str: String) {
-        if (debug)
-            System.out.println(str);
+    //扩展类方法
+    fun Any.println() {
+        if (debug) println(toString())
     }
 }
