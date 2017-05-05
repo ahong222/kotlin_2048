@@ -2,6 +2,7 @@ package com.ifnoif.game2048
 
 import android.app.Activity
 import android.os.Bundle
+import android.preference.PreferenceManager
 import kotlinx.android.synthetic.main.activity_game.*
 
 /**
@@ -10,14 +11,17 @@ import kotlinx.android.synthetic.main.activity_game.*
 
 class GameActivity : Activity() {
 
+    var mBestScore = 0;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
         start.setOnClickListener {
-            GsonTest.testGson()
             gameView.start()
         }
+
+        mBestScore = PreferenceManager.getDefaultSharedPreferences(applicationContext).getInt("best_score", 0)
+        bestScore.text = "" + mBestScore
     }
 
     fun onScoreChanged(scoreValue: Int) {
@@ -28,4 +32,13 @@ class GameActivity : Activity() {
         super.onPause()
     }
 
+    fun onGameComplete() {
+        var score = Integer.parseInt(score.text.toString())
+        if (score > mBestScore) {
+            mBestScore = score;
+            bestScore.text = "" + score;
+
+            PreferenceManager.getDefaultSharedPreferences(applicationContext).edit().putInt("best_score", score).apply()
+        }
+    }
 }

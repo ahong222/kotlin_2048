@@ -11,54 +11,113 @@
 
 
     <LinearLayout
-        android:id="@+id/score_layout"
+        android:id="@+id/best_score_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:background="@drawable/game_bg"
+        android:gravity="center"
+        android:minHeight="60dp"
+        android:minWidth="60dp"
+        android:orientation="vertical"
+        android:padding="5dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="得分:" />
+            android:gravity="center"
+            android:text="BEST"
+            android:textColor="#EEE4D9"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/bestScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="#E07C00"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/scoreLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/best_score_layout"
+        android:background="@drawable/game_bg"
+        android:gravity="center"
+        android:minHeight="60dp"
+        android:minWidth="60dp"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="SCORE"
+            android:textColor="#EEE4D9"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="100dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="0"
             android:textColor="#E07C00"
-            android:textSize="40sp"
-            android:textStyle="bold"
-            android:layout_marginLeft="15dp"/>
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
-    <com.ifnoif.game2048.Game2048View
-        android:id="@+id/gameView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/score_layout"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="30dp"
-        android:background="#50004400"
-        app:gird="4" />
-
     <FrameLayout
-        android:layout_width="match_parent"
+        android:id="@+id/start"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/gameView"
-        android:layout_marginTop="50dp"
-        android:gravity="center">
+        android:layout_alignBaseline="@id/scoreLayout"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:background="@drawable/game_bg"
+        android:gravity="center"
+        android:padding="5dp">
 
-        <Button
-            android:id="@+id/start"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="开始" />
+            android:text="New Game"
+            android:textColor="#F9F6F2"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
 
     </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/gameContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/start"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/game_bg"
+        android:padding="@dimen/block_margin">
+
+        <com.ifnoif.game2048.Game2048View
+            android:id="@+id/gameView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:gird="4" />
+
+    </FrameLayout>
+
+
 </RelativeLayout>
