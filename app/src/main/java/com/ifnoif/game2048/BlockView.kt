@@ -17,6 +17,8 @@ class BlockView : FrameLayout {
 
     lateinit var mBlockText: TextView
     lateinit var mCenterBlock: FrameLayout
+    lateinit var gameConfig:GameConfig
+
     var point: Point = Point()
     private var value: Int = 0;
 
@@ -46,21 +48,20 @@ class BlockView : FrameLayout {
         mBlockText.setText("" + value)
         var color = 0;
         if (Build.VERSION.SDK_INT >= 23) {
-            color = context.getColor(Game2048View.getBlockTextColor(value, context));
+            color = context.getColor(gameConfig.getBlockTextColor(value))
         } else {
-            context.resources.getColor(Game2048View.getBlockTextColor(value, context))
+            context.resources.getColor(gameConfig.getBlockTextColor(value))
         }
         mBlockText.setTextColor(color)
 
-        mCenterBlock.setBackgroundResource(Game2048View.getBlockBg(value, context))
+        mCenterBlock.setBackgroundResource(gameConfig.getBlockBg(value))
     }
 
     companion object {
-        fun create(context: Context, point: Point, value: Int): BlockView {
+        fun create(context: Context, point: Point): BlockView {
             var blockView = LayoutInflater.from(context).inflate(R.layout.block_view_layout, null, false) as BlockView
 
             blockView.point = point
-            blockView.setNumber(value)
 
             return blockView;
         }

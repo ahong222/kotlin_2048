@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/com.ifnoif.androidtestdemo"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_game"
     android:layout_width="match_parent"
@@ -112,10 +111,11 @@
         android:padding="@dimen/block_margin">
 
         <com.ifnoif.game2048.Game2048View
+            xmlns:custom="http://schemas.android.com/apk/res-auto"
             android:id="@+id/gameView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:gird="4" />
+            custom:grid="5" />
 
     </FrameLayout>
 

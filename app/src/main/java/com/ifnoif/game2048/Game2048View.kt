@@ -19,25 +19,18 @@ import java.util.*
  */
 
 class Game2048View : FrameLayout {
+
+    lateinit var gameConfig: GameConfig
+
     companion object {
 
         var TAG = "Game2048View"
 
-        fun getBlockBg(value: Int, context: Context): Int {
-            return context.resources.getIdentifier("block_bg" + value, "drawable", context.packageName);
-        }
-
-        fun getBlockTextColor(value: Int, context: Context): Int {
-            return context.resources.getIdentifier("block_text_color" + value, "color", context.packageName);
-        }
     }
-
-    var TYPE_GOOD: String = "GOOD"
-    var TYPE_MERGE: String = "MERGE"
-    var TYPE_MOVE: String = "MOVE"
 
     var mTouchSlop: Int = 0
     var mStarted: Boolean = false
+    var mMaxValue = 0
 
     val mDuration: Long = 300
     var mColumnSize: Int
@@ -55,9 +48,6 @@ class Game2048View : FrameLayout {
 
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0) {
 
-        SoundPoolManager.init(context, TYPE_GOOD, R.raw.good)
-        SoundPoolManager.init(context, TYPE_MERGE, R.raw.merge)
-        SoundPoolManager.init(context, TYPE_MOVE, R.raw.move)
 
         val vc = ViewConfiguration.get(getContext())
         mTouchSlop = vc.scaledTouchSlop
@@ -66,9 +56,8 @@ class Game2048View : FrameLayout {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         val typeArray: TypedArray = context!!.obtainStyledAttributes(attrs,
                 R.styleable.Game2048View)
-        mColumnSize = typeArray.getInteger(R.styleable.Game2048View_grid, 4)
+        mColumnSize = typeArray.getInt(R.styleable.Game2048View_grid, 4)
         typeArray.recycle()
-
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -80,12 +69,13 @@ class Game2048View : FrameLayout {
     fun start() {
         Log.d(TAG, "开始游戏")
         reset()
-        doNext()
+        doNext(true)
         mStarted = true
     }
 
-    fun doNext() {
-        if (checkGameOver()) {
+    fun doNext(first: Boolean) {
+        var gameStatus = checkGameOver()
+        if (gameStatus > 0) {
             Log.d(TAG, "游戏结束")
             (context as GameActivity).onGameComplete()
             var dialog = AlertDialog.Builder(context).setTitle("Game Over").setMessage(String.format("您本次得分%d,是否再玩一遍", totalScore))
@@ -94,21 +84,29 @@ class Game2048View : FrameLayout {
             dialog.show()
             return
         }
-        var randomIndex = Random().nextInt(mEmptyPointList.size)
-        var point = mEmptyPointList.removeAt(randomIndex)
+        var randomCount = if (first) gameConfig.getFirstRandomCount() else gameConfig.getNormalRandomCount()
+        for (i in 0..randomCount - 1) {
+            if (mEmptyPointList.size == 0) {
+                break
+            }
+            var randomIndex = Random().nextInt(mEmptyPointList.size)
+            var point = mEmptyPointList.removeAt(randomIndex)
 
-        var randomValue = getRandomValue()
-        (mBlockArray[point.y])[point.x].value = randomValue
+            var randomValue = gameConfig.randomValue()
+            (mBlockArray[point.y])[point.x].value = randomValue
 
-        var view = BlockView.create(context, point, randomValue)
-        addView(view, LayoutParams(width / mColumnSize, width / mColumnSize))
+            var view = BlockView.create(context, point)
+            view.gameConfig = gameConfig
+            view.setNumber(randomValue)
+            addView(view, LayoutParams(width / mColumnSize, width / mColumnSize))
 
-        view.translationX = (point.x * width.toFloat()) / mColumnSize
-        view.translationY = (point.y * height.toFloat()) / mColumnSize
+            view.translationX = (point.x * width.toFloat()) / mColumnSize
+            view.translationY = (point.y * height.toFloat()) / mColumnSize
 
-        invalidate()
+            invalidate()
 
-        Log.d(TAG, "生成一个方块(" + point.x + "," + point.y + "),大小:" + randomValue)
+            Log.d(TAG, "生成一个方块(" + point.x + "," + point.y + "),大小:" + randomValue)
+        }
     }
 
     fun scroll(direction: GameUtil.Direction) {
@@ -126,7 +124,7 @@ class Game2048View : FrameLayout {
         }
 
 
-        var callback: Runnable = Runnable { doNext() }
+        var callback: Runnable = Runnable { doNext(false) }
         doActionAnimation(callback)
     }
 
@@ -158,7 +156,7 @@ class Game2048View : FrameLayout {
                 targetRemoveView = getView(block.changeX, block.changeY)
 
             } else {
-                play(TYPE_MOVE)
+                gameConfig.onMove()
             }
             var scrollHorizontal: Boolean = (block.pY == block.y)
 
@@ -207,7 +205,9 @@ class Game2048View : FrameLayout {
                     var newValue = view.getValue() * 2
                     view.setNumber(newValue)
 
-                    play(TYPE_MERGE)
+                    gameConfig.onMerged(newValue)
+                    mMaxValue = Math.max(mMaxValue, newValue)
+
                     Log.d(TAG, "改变" + "(" + view.point.x + "," + view.point.y + ")的值为" + view.getValue())
                 } else {
                     Log.d(TAG, "移动 currentTranslation：" + currentTranslation + " removeTranslation:" + view.removeTranslation)
@@ -228,22 +228,20 @@ class Game2048View : FrameLayout {
         return null
     }
 
-    /**
-     * return 2 or 4
-     */
-    fun getRandomValue(): Int {
-        return 2 + Random().nextInt(2) * 2
-    }
-
-    fun checkGameOver(): Boolean {
-        //TODO 提前计算能不能减少位置
-        return mEmptyPointList.size == 0 //没有空白位置，且滑动也不能减少位置
+    fun checkGameOver(): Int {
+        if(gameConfig.win(mMaxValue)){
+            return 1
+        } else if(mEmptyPointList.size == 0){
+            return 2
+        }
+        return 0
     }
 
     fun reset() {
         Log.d(TAG, "初始化")
         mStarted = false
         totalScore = 0
+        mMaxValue = 0
         onScoreChanged()
         removeAllViews()
         mEmptyPointList.clear()
@@ -253,10 +251,6 @@ class Game2048View : FrameLayout {
                 mEmptyPointList.add(Point(x, y))
             }
         }
-    }
-
-    fun play(type: String) {
-        SoundPoolManager.play(type)
     }
 
     var touchDownX: Float = 0f

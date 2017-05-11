@@ -11,10 +11,14 @@ import kotlinx.android.synthetic.main.activity_game.*
 
 class GameActivity : Activity() {
 
-    var mBestScore = 0;
+    var mBestScore = 0
+    lateinit var gameController:GameController
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        gameController = GameController(applicationContext)
+        gameView.gameConfig = gameController.getDefaultGameConfig()
 
         start.setOnClickListener {
             gameView.start()

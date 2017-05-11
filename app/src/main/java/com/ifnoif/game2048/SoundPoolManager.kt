@@ -2,7 +2,6 @@ package com.ifnoif.game2048
 
 import android.content.Context
 import android.media.SoundPool
-import java.io.IOException
 
 /**
  * Created by shen on 17/4/17.
@@ -10,10 +9,13 @@ import java.io.IOException
 
 
 object SoundPoolManager {
-
     var soundMap: HashMap<Int, String> = HashMap()
     var soundPreparedMap: HashMap<String, Int> = HashMap()
     var soundPool: SoundPool = SoundPool.Builder().build();
+
+    var TYPE_GOOD: String = "GOOD"
+    var TYPE_MERGE: String = "MERGE"
+    var TYPE_MOVE: String = "MOVE"
 
     init {
         soundPool.setOnLoadCompleteListener { soundPool, sampleId, status ->
