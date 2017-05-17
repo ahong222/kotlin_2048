@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "964158079386",
+    "firebase_url": "https://game2048-6c80e.firebaseio.com",
+    "project_id": "game2048-6c80e",
+    "storage_bucket": "game2048-6c80e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:964158079386:android:f9003fa83e136d16",
+        "android_client_info": {
+          "package_name": "com.ifnoif.game2048"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "964158079386-3lua0gfdnn8hculrc9682b6et6qlcqhn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ifnoif.game2048",
+            "certificate_hash": "4435ab54eeb8749c6deb186e6ebce040f6d16377"
+          }
+        },
+        {
+          "client_id": "964158079386-svnfov9rsid7k1q1efotp99o3asded6g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAI7_ZjL1KtVRQTGKbWIVWMVuuFmD-bx2A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "964158079386-svnfov9rsid7k1q1efotp99o3asded6g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

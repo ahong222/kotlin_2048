@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="BEST"
+            android:text="@string/best"
             android:textColor="#EEE4D9"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -60,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="SCORE"
+            android:text="@string/score"
             android:textColor="#EEE4D9"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -85,12 +85,15 @@
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:background="@drawable/game_bg"
         android:gravity="center"
-        android:padding="5dp">
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New Game"
+            android:text="@string/start"
             android:textColor="#F9F6F2"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -115,7 +118,7 @@
             android:id="@+id/gameView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            custom:grid="5" />
+            custom:grid="4" />
 
     </FrameLayout>
 

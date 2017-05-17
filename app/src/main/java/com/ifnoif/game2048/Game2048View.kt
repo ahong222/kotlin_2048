@@ -78,9 +78,9 @@ class Game2048View : FrameLayout {
         if (gameStatus > 0) {
             Log.d(TAG, "游戏结束")
             (context as GameActivity).onGameComplete()
-            var dialog = AlertDialog.Builder(context).setTitle("Game Over").setMessage(String.format("您本次得分%d,是否再玩一遍", totalScore))
-                    .setPositiveButton("确定", { dialog, which -> start() })
-                    .setNegativeButton("取消", { dialog, which -> reset(); invalidate(); }).create()
+            var dialog = AlertDialog.Builder(context).setTitle(R.string.game_over_title).setMessage(context.getString(R.string.game_over, totalScore))
+                    .setPositiveButton(R.string.dialog_confirm, { dialog, which -> start() })
+                    .setNegativeButton(R.string.dialog_cancel, { dialog, which -> reset(); invalidate(); }).create()
             dialog.show()
             return
         }

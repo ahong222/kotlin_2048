@@ -244,18 +244,6 @@ class GameUtil {
     }
 
     fun onStartScroll(array: Array<Array<Block>>) {
-//        var size: Int = array.size;
-//        for (y in (0..size - 1)) {
-//            for (x in (0..size - 1)) {
-//                (array[y])[x].reset();
-//            }
-//        }
-
-//        使用函数
-//        array.forEach { arr->arr.forEach { item->item.reset() } }
-//        array.flatten().forEach { item->item.reset() }
-//        array.flatMap { item->item.toList()}.forEach { Block::reset }
-//        array.flatten().forEach { Block::reset }
         array.flatten().forEach(Block::reset)
     }
 
@@ -291,65 +279,6 @@ class GameUtil {
         var listAction: ArrayList<Block> = ArrayList<Block>();
         scroll(array, direction, listPoint, listAction);
     }
-
-    open class Block1  {
-        //最终的Value
-        var value: Int = 0;
-        //最终的位置
-        var x: Int = 0;
-        var y: Int = 0;
-
-        //临时变量
-        var pX: Int = 0;
-        var pY: Int = 0;
-        var pValue: Int = 0;
-        var changeX: Int = -1;
-        var changeY: Int = -1;
-        var merged = false;
-
-        //x,y 与 px,py不相等表示有移动
-        //value与pValue不相等表示有合并，value>pValue表示合并，value＝0表示被合并，要删除View
-        //changeX,changeY表示改变值的坐标
-
-        constructor(x: Int, y: Int, value: Int) {
-            this.x = x;
-            this.y = y;
-            this.value = value;
-        }
-
-        init {
-            pX = x;
-            pY = y;
-            pValue = value;
-        }
-
-        fun copy(): Block1 {
-            var block = Block1(x, y, value);
-            block.pX = pX;
-            block.pY = pY;
-            block.pValue = pValue;
-            block.changeX = changeX;
-            block.changeY = changeY;
-            block.merged = merged;
-            return block
-        }
-
-        fun reset() {
-            pX = x;
-            pY = y;
-            pValue = value;
-            merged = false;
-            changeX = -1;
-            changeY = -1;
-        }
-
-        fun getActionStr(): String {
-            var block: Block1 = this;
-            var direct = if (block.pX == block.x) (if (block.y > block.pY) "向下" else "向上") else (if (block.x > block.pX) "向右" else "向左");
-            return "方块从 px:" + block.pX + " pY:" + block.pY + " " + direct + "滑到:" + block.x + "," + block.y + (if (block.changeX < 0) "" else (",并移除(" + block.changeX + "," + block.changeY + ")"))
-        }
-    }
-
 
     /**
      * 最终的位置：x,y,value

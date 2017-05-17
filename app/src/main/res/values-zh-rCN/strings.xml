@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dialog_confirm">确定</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="game_over">本次您获得%1d分,是否再玩一遍？</string>
+
+    <string name="best">最佳</string>
+    <string name="score">得分</string>
+    <string name="start">开始</string>
+    <string name="enter_nick_name">请输入您的昵称</string>
+    <string name="tips">提示</string>
+
+</resources>

@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">Game2048</string>
+
+    <string name="dialog_confirm">Ok</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="game_over">This time you got %1d points, do you try again？</string>
+
+    <string name="best">BEST</string>
+    <string name="score">SCORE</string>
+    <string name="start">START</string>
+    <string name="game_over_title">Game Over</string>
+    <string name="enter_nick_name">Please enter you nick name</string>
+    <string name="tips">Tips</string>
+
+    <!-- 登录 -->
+    <string name="title_sign_in">Welcome</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="hint_password">password</string>
+    <string name="hint_email">email</string>
+    <string name="sign_in">Sign In</string>
+
 </resources>
